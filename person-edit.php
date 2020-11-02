@@ -83,7 +83,10 @@ if ($_POST) {
             // Set password from input fields.
             // Check whether passwords match.
             if ($plainPassword1 != $plainPassword2) {
-                $validationErrorMessage .= "Passwords do not match.<br>\n";
+                // If there is no password error message already, add one.
+                if (! containsString($validationErrorMessage, 'password')) {
+                    $validationErrorMessage .= "Passwords do not match.<br>\n";
+                }
             }
             else {
                 // Passwords match.
@@ -96,13 +99,19 @@ if ($_POST) {
         // Check whether password data typed in.
         if ($plainPassword1 == '' && $plainPassword2 == '') {
             // Both fields MT.
-            $validationErrorMessage .= "Please enter the password twice.<br>\n";
+            // If there is no password error message already, add one.
+            if (! containsString($validationErrorMessage, 'password')) {
+                $validationErrorMessage .= "Please enter the password twice.<br>\n";
+            }
         }
         else {
             // There is password data.
             // Check whether passwords match.
             if ($plainPassword1 != $plainPassword2) {
-                $validationErrorMessage .= "Passwords do not match.<br>\n";
+                // If there is no password error message already, add one.
+                if (! containsString($validationErrorMessage, 'password')) {
+                    $validationErrorMessage .= "Passwords do not match.<br>\n";
+                }
             }
             else {
                 // Passwords match.
@@ -186,7 +195,15 @@ else {
 <?php
 require_once 'library/page-elements/page-top.php';
 ?>
-<h1><?php print $personId == 0 ? 'Create' : 'Edit';?> person</h1>
+<h1><?php
+    if ($personId == 0) {
+        print 'Create';
+    }
+    else {
+        print 'Edit';
+    }
+    ?> person</h1>
+}
 <?php
 if ($validationErrorMessage != '') {
     ?>

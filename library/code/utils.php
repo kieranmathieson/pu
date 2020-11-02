@@ -42,7 +42,7 @@ function writeCsvMessage(string $filePath, string $programId, string $message) {
 
 /**
  * Run through an array, replacing nulls with MT strings.
- * @param $arr Array to process.
+ * @param $arr array to process.
  * @return array Processed array.
  */
 function replaceNullWithSpace(array $arr) {
@@ -123,7 +123,7 @@ function isUsernameExists(string $username): bool {
         $stmnt->execute($queryData);
     }
     catch (PDOException $e) {
-        logError(self::PROGRAM_ID, $e->getMessage());
+        logError(__FILE__, $e->getMessage());
         return INTERNAL_ERROR_MESSAGE;
     }
     $numRows = $stmnt->rowCount();
@@ -146,10 +146,21 @@ function isEmailExists(string $email): bool {
         $stmnt->execute($queryData);
     }
     catch (PDOException $e) {
-        logError(self::PROGRAM_ID, $e->getMessage());
+        logError(__FILE__, $e->getMessage());
         return INTERNAL_ERROR_MESSAGE;
     }
     $numRows = $stmnt->rowCount();
     return $numRows > 0;
 }
 
+/**
+ * Check whether one string contains another, not case-sensitive.
+ * (Abstracts away from strangeness in stripos()).
+ * @param string $haystack String the search.
+ * @param string $needle String to find.
+ * @return bool True if found.
+ */
+function containsString(string $haystack, string $needle): bool {
+    $found = !(stripos($haystack, $needle) === FALSE);
+    return $found;
+}
