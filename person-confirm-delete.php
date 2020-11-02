@@ -4,6 +4,7 @@
  * Receives id as a GET param.
  */
 // Initialize the app.
+// noinspection DuplicatedCode
 require_once 'library/code/init.php';
 global $currentUser;
 // Check access to this page.
@@ -25,6 +26,7 @@ $person = new Person();
 $person->load($personId);
 // Set the page title shown in the header template.
 $pageTitle = 'Confirm delete person|PU';
+// noinspection DuplicatedCode
 ?><!doctype html>
 <html lang="en">
 <head>

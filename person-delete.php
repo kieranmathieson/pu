@@ -4,6 +4,7 @@
  * Receives id as a GET param.
  */
 // Initialize the app.
+// noinspection DuplicatedCode
 require_once 'library/code/init.php';
 /** @var $currentUser Person */
 global $currentUser;

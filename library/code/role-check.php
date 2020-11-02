@@ -34,6 +34,9 @@ function isCurrentUserHasRole(string $roleName) {
     return $hasRole;
 }
 
+/**
+ * Redirect to access denied page.
+ */
 function accessDenied() {
     header('Location: access-denied.php');
     exit();

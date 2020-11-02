@@ -275,4 +275,3 @@ require_once 'library/page-elements/footer.php';
 ?>
 </body>
 </html>
-

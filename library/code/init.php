@@ -31,7 +31,8 @@ function loadCurrentUser() {
         $currentUser = new Person();
         $errorMessage = $currentUser->load($userId);
         if ($errorMessage != '') {
-            print "Error loading current user: $errorMessage";
+            logError('init.php', "Person load failed for user id: $userId");
+            print INTERNAL_ERROR_MESSAGE;
             exit();
         }
     } else {
