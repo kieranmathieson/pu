@@ -1,16 +1,12 @@
 <?php
 // Initialize the app.
 require_once 'library/code/init.php';
-// Check access to this page. Adjust the roles.
+// Check access to this page.
 $accessOk = isCurrentUserHasRole(ADMIN_ROLE);
-checkAccess($accessOk);
+checkAccess($accessOk, __FILE__);
 // Set the page title shown in the header template.
 $pageTitle = 'List users|PU';
-// Uncomment global if needed for the page's logic.
-/** @var $currentUser Person */
-// global $currentUser;
-/** @var $dbConnector DbConnector */
-//global $dbConnector;
+global $currentUser;
 ?><!doctype html>
 <html lang="en">
 <head>
@@ -53,11 +49,7 @@ if (isset($_GET['sort'])) {
     </thead>
     <tbody>
     <?php
-    // Create query.
-    $queryData = [
-        'sort' => $sortField
-    ];
-    $sql = "select * from people order by :sort";
+    $sql = "select * from people order by $sortField";
     // Run the query.
     /** @var $dbConnector DbConnector */
     global $dbConnector;
@@ -65,9 +57,10 @@ if (isset($_GET['sort'])) {
     $dbConnection = $dbConnector->getConnection();
     try {
         $stmnt = $dbConnection->prepare($sql);
-        $queryResult = $stmnt->execute($queryData);
+        $queryResult = $stmnt->execute();
     } catch (PDOException $e) {
-        print $e->getMessage();
+        logError(__FILE__, $e->getMessage());
+        print INTERNAL_ERROR_MESSAGE;
         exit();
     }
     // Loop over results.

@@ -14,6 +14,9 @@ The goal is to make a web app that has a few basic functions, but is bulletproof
 * Duplicate usernames or email addresses not allowed.
 * Bootstrap for a11y and responsiveness.
 * OOP classes for business entities.
+* Utility functions to simplify code.
 * DRY
+
+Repo includes PHPStorm config files. Except for data sources.
 
 

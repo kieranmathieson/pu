@@ -4,9 +4,9 @@
  */
 // Initialize the app.
 require_once 'library/code/init.php';
-// Check access to this page. Adjust the roles.
+// Check access to this page.
 $accessOk = isCurrentUserHasRole(ADMIN_ROLE);
-checkAccess($accessOk);
+checkAccess($accessOk, __FILE__);
 // Set the page title shown in the header template.
 $pageTitle = 'Admin|PU';
 // Uncomment global if needed for the page's logic.
@@ -17,7 +17,7 @@ $pageTitle = 'Admin|PU';
 // Is there a person id in the URL?
 $personIdOk = isPersonIdInGetOK();
 if (!$personIdOk) {
-    accessDenied();
+    accessDenied('person-view: bad id');
 }
 $personId = $_GET['id'];
 $person = new Person();

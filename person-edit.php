@@ -5,36 +5,41 @@
  * Person id passed in GET if it's an edit.
  * POST data present for fields if there is data to be validated. That
  * happens for both edit and insert.
+ *
+ * There is a different page for non-admins editing their own account.
  */
 // Initialize the app.
 require_once 'library/code/init.php';
-global $dbConnection;
-// Check access to this page.
-$accessOk = isCurrentUserHasRole(ADMIN_ROLE);
-checkAccess($accessOk);
-// Set the page title shown in the header template.
-$pageTitle = 'Create person|PU';
-if (isset($_GET['id'])) {
-    $pageTitle = 'Edit person|PU';
-}
+global $currentUser;
 // User id to edit is passed in the URL. If not there, must be a create.
 // Show an insert by setting the id to 0.
 $personId = 0;
+$personToEdit = null;
 // Was a person id given?
 if (isset($_GET['id'])) {
     $personId = $_GET['id'];
     // Validate.
-    if (is_nan($personId) || $personId <= 0) {
+    if (! is_numeric($personId) || $personId <= 0) {
         // Freak out.
-        accessDenied();
+        accessDenied("person-edit: bad id: $personId");
     }
     // Does the person exist?
-    $person = new Person();
-    $errorMessage = $person->load($personId);
+    $personToEdit = new Person();
+    $errorMessage = $personToEdit->load($personId);
     if ($errorMessage != '') {
         // Something went wrong. Freak out.
-        accessDenied();
+        accessDenied('person-edit: bad data in load');
     }
+}
+// If get to here, $personToEdit will have a person object.
+// Check access to this page.
+// Admins are OK.
+$accessOk = isCurrentUserHasRole(ADMIN_ROLE);
+checkAccess($accessOk, __FILE__);
+// Set the page title shown in the header template.
+$pageTitle = 'Create person|PU';
+if (isset($_GET['id'])) {
+    $pageTitle = 'Edit person|PU';
 }
 // Init person fields to MT.
 $userName = '';
@@ -120,8 +125,8 @@ if ($_POST) {
         }
     } // End process password for new user.
     // Try making a person with this data.
-    $person = new Person();
-    $validationErrorMessage .= $person->populateFields(
+    $personToEdit = new Person();
+    $validationErrorMessage .= $personToEdit->populateFields(
         $userName, $encryptedPassword,
         $lastName, $firstName,
         $email, $telephone,
@@ -135,27 +140,37 @@ if ($_POST) {
             // New person.
             // Make sure the username and email aren't already being used.
             if (isUsernameExists($userName)) {
-                $validationErrorMessage = "Sorry, someone already has the username $userName<br>";
+                $validationErrorMessage .= "Sorry, someone already has the username $userName<br>";
             }
             if (isEmailExists($email)) {
-                $validationErrorMessage = "Sorry, someone already has the email address $email<br>";
+                $validationErrorMessage .= "Sorry, someone already has the email address $email<br>";
             }
             // Still OK?
             if ($validationErrorMessage == '') {
                 // This will save the new id in the object.
-                $person->saveAsNew();
+                $validationErrorMessage = $personToEdit->saveAsNew();
+                // Still OK?
+                if ($validationErrorMessage == '') {
+                    // To person view.
+                    header("Location: person-view.php?id={$personToEdit->getId()}");
+                    exit();
+                }
+
             }
         }
         else {
             // Existing person.
             // Set the id - hasn't been done yet, since there is no
             // form field for it.
-            $person->setId($personId);
-            $person->update();
+            $personToEdit->setId($personId);
+            $validationErrorMessage = $personToEdit->update();
+            // Still OK?
+            if ($validationErrorMessage == '') {
+                // To person view.
+                header("Location: person-view.php?id={$personToEdit->getId()}");
+                exit();
+            }
         }
-        // To person view.
-        header("Location: person-view.php?id={$person->getId()}");
-        exit();
     }
 }
 else {
@@ -164,24 +179,24 @@ else {
         // There is an id, but no post data.
         // This happens when clicking on Edit link in person-list.php
         // Load the person's data for the form.
-        $person = new Person();
-        $errorMessage = $person->load($personId);
+        $personToEdit = new Person();
+        $errorMessage = $personToEdit->load($personId);
         if ($errorMessage != '') {
             // Something bad happened.
             print $errorMessage;
             exit();
         }
         // Copy data from $person into vars for the form.
-        $userName = $person->getUserName();
-        $lastName = $person->getLastName();
-        $firstName = $person->getFirstName();
-        $email = $person->getEmail();
-        $telephone = $person->getTelephone();
-        $about = $person->getAbout();
-        $isAdmin = $person->isAdmin();
-        $isStaff = $person->isStaff();
-        $isFaculty = $person->isFaculty();
-        $isStudent = $person->isStudent();
+        $userName = $personToEdit->getUserName();
+        $lastName = $personToEdit->getLastName();
+        $firstName = $personToEdit->getFirstName();
+        $email = $personToEdit->getEmail();
+        $telephone = $personToEdit->getTelephone();
+        $about = $personToEdit->getAbout();
+        $isAdmin = $personToEdit->isAdmin();
+        $isStaff = $personToEdit->isStaff();
+        $isFaculty = $personToEdit->isFaculty();
+        $isStudent = $personToEdit->isStudent();
     }
 }
 ?><!doctype html>
@@ -203,7 +218,6 @@ require_once 'library/page-elements/page-top.php';
         print 'Edit';
     }
     ?> person</h1>
-}
 <?php
 if ($validationErrorMessage != '') {
     ?>
@@ -237,30 +251,10 @@ $formAction = ($personId == 0) ? 'person-edit.php' : "person-edit.php?id=$person
                id="password2" name="password2">
         <small id="password2Help" class="form-text text-muted">Leave blank to not change the password.</small>
     </div>
-    <div class="form-group">
-        <label for="first-name">First name</label>
-        <input type="text" class="form-control" id="first-name" name="first-name"
-               value="<?php print $firstName; ?>">
-    </div>
-    <div class="form-group">
-        <label for="last-name">Last name</label>
-        <input type="text" class="form-control" id="last-name" name="last-name"
-               value="<?php print $lastName; ?>">
-    </div>
-    <div class="form-group">
-        <label for="email">Email address</label>
-        <input type="email" class="form-control" id="email" name="email"
-               value="<?php print $email; ?>">
-    </div>
-    <div class="form-group">
-        <label for="telephone">Telephone</label>
-        <input type="tel" class="form-control" id="telephone" name="telephone"
-               value="<?php print $telephone; ?>">
-    </div>
-    <div class="form-group">
-        <label for="about">About</label>
-        <textarea class="form-control" id="about" name="about" rows="4"><?php print $about; ?></textarea>
-    </div>
+    <?php
+    // Bring in HTML code for form fields shared with other programs.
+    include_once 'library/page-elements/person-basic-fields.php';
+    ?>
     <div class="form-check">
         <input type="checkbox" class="form-check-input" id="admin" name="admin"
             <?php print makeCheckboxValueFromBool($isAdmin); ?> >

@@ -25,11 +25,12 @@ if ($managePeopleMenu) {
 if ($manageCoursesMenu) {
     ?>
     <p class="lead">Courses</p>
+    <p><a href="course-list.php">List courses</a></p>
+    <p><a href="course-edit.php">Add new course</a></p>
     <?php
 }
 if ($manageEnrollmentsMenu) {
     ?>
-    <p><a href="admin-actions.php">Admin actions</a></p>
     <?php
 }
 ?>

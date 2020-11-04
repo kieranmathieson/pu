@@ -21,7 +21,7 @@
         if (is_null($currentUser)) {
             ?>
             <div class="nav-item float-right">
-                <a class="nav-link" href="login.php">Login</a>
+                <a id="login-link" href="login.php">Login</a>
             </div>
             <?php
         }

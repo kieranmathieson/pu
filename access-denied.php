@@ -1,7 +1,8 @@
 <?php
 // Initialize the app.
 require_once 'library/code/init.php';
-// No access check needed.
+// Log it.
+
 // Set the page title shown in the header template.
 $pageTitle = 'Access denied|PU';
 ?><!doctype html>

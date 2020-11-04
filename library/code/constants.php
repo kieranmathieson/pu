@@ -22,8 +22,15 @@ const DB_FIELD_NAME_STAFF = "staff";
 const DB_FIELD_NAME_FACULTY = "faculty";
 const DB_FIELD_NAME_STUDENT = "student";
 
-const DB_FIELD_NAME_COURSE_ID = "";
-const DB_FIELD_NAME_COURSE_NAME = "";
+// course table
+const DB_FIELD_NAME_COURSE_ID = "course_id";
+const DB_FIELD_NAME_COURSE_CODE = "code";
+const DB_FIELD_NAME_COURSE_TITLE = "title";
+const DB_FIELD_NAME_COURSE_MAX_ENROLLMENTS = 'max_enrollments';
+const DB_FIELD_NAME_COURSE_INSTRUCTOR = 'instructor';
+
+// How many characters in a course code?
+const COURSE_CODE_NUM_CHARS = 7;
 
 // File paths.
 const SECRET_DB_PARAMS_FILE_PATH = '../db-params.ini';

@@ -10,18 +10,19 @@ require_once 'library/code/init.php';
 global $currentUser;
 // Check access to this page.
 $accessOk = isCurrentUserHasRole(ADMIN_ROLE);
-checkAccess($accessOk);
+checkAccess($accessOk, __FILE__);
 // Make sure there is a person id that's real.
 $personIdOk = isPersonIdInGetOK();
 if (!$personIdOk) {
-    accessDenied();
+    accessDenied('person-delete: bad id');
 }
 $personId = $_GET['id'];
 // Make sure this is not the current user's id.
 // Can't erase your own record.
 if ($currentUser->getId() == $personId) {
-    accessDenied();
+    accessDenied('person-delete: trying to delete own record');
 }
+
 // Load the person record.
 $person = new Person();
 $person->load($personId);

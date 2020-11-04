@@ -3,7 +3,7 @@
 require_once 'library/code/init.php';
 // Only admins can access.
 $accessOk = isCurrentUserHasRole(STAFF_ROLE);
-checkAccess($accessOk);
+checkAccess($accessOk, __FILE__);
 // Set the page title shown in the header template.
 $pageTitle = 'Staff actions|PU';
 ?><!doctype html>

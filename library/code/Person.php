@@ -39,7 +39,7 @@ class Person
     {
         $error = '';
         // Data type check.
-        if (is_nan($idIn)) {
+        if (! is_numeric($idIn)) {
             logError(self::PROGRAM_ID, "Error in setId: id is not a number: $idIn");
             $error = 'Sorry, person id must be a number<br>';
         }
@@ -216,11 +216,13 @@ class Person
     {
         $error = '';
         $emailIn = trim($emailIn);
-        if ($emailIn != '') {
-            if (!filter_var($emailIn, FILTER_VALIDATE_EMAIL)) {
-                logError(self::PROGRAM_ID,"Error in setEmail. Value: $emailIn");
-                $error = 'Sorry, the email address is invalid.<br>';
-            }
+        if ($emailIn == '') {
+            logError(self::PROGRAM_ID, 'Error in setEmail. Value MT.');
+            $error = 'Sorry, email cannot be empty.<br>';
+        }
+        elseif (!filter_var($emailIn, FILTER_VALIDATE_EMAIL)) {
+            logError(self::PROGRAM_ID,"Error in setEmail. Value: $emailIn");
+            $error = 'Sorry, the email address is invalid.<br>';
         }
         if ($error == '') {
             $this->email = $emailIn;
@@ -379,7 +381,7 @@ class Person
      */
     public function populateFromDatabaseRow(array $userRow): string {
         $accumulatedErrors = '';
-        $userRow = replaceNullWithSpace($userRow);
+        $userRow = replaceNullWithMtString($userRow);
         $accumulatedErrors .= $this->setId($userRow['person_id']);
         $accumulatedErrors .= $this->populateFields(
             $userRow['username'], $userRow['password'],
@@ -437,6 +439,11 @@ class Person
         /** @var $currentUser Person */
         global $currentUser;
         $accumulatedErrors = '';
+        // Check that required data is present.
+        $accumulatedErrors .= $this->checkRequiredDataPresent();
+        if ($accumulatedErrors != '') {
+            return $accumulatedErrors;
+        }
         // Get a DB connection.
         $dbConnection = $dbConnector->getConnection();
         // Make INSERT.
@@ -489,6 +496,30 @@ class Person
     }
 
     /**
+     * Check whether required fields are present.
+     * @return string Errors, or MT string if all OK.
+     */
+    private function checkRequiredDataPresent(): string {
+        $accumulatedErrors = '';
+        if ($this->getUserName() == '') {
+            $accumulatedErrors .= 'Sorry, username is required.<br>';
+        }
+        if ($this->getEncryptedPassword() == '') {
+            $accumulatedErrors .= 'Sorry, encrypted password is required.<br>';
+        }
+        if ($this->getEmail() == '') {
+            $accumulatedErrors .= 'Sorry, email is required.<br>';
+        }
+        if ($this->getFirstName() == '') {
+            $accumulatedErrors .= 'Sorry, first name is required.<br>';
+        }
+        if ($this->getLastName() == '') {
+            $accumulatedErrors .= 'Sorry, last name is required.<br>';
+        }
+        return $accumulatedErrors;
+    }
+
+    /**
      * Update record in DB, using current values.
      * @return string Error message, null for no error.
      */
@@ -496,9 +527,14 @@ class Person
         global $dbConnector;
         /** @var $currentUser Person */
         global $currentUser;
-        $error = '';
+        $accumulatedErrors = '';
         // Get a DB connection.
         $dbConnection = $dbConnector->getConnection();
+        // Check that required data is present.
+        $accumulatedErrors .= $this->checkRequiredDataPresent();
+        if ($accumulatedErrors != '') {
+            return $accumulatedErrors;
+        }
         $updateData = [
             'userName' => $this->getUserName(),
             'encryptedPassword' => $this->getEncryptedPassword(),
@@ -530,7 +566,7 @@ class Person
             return INTERNAL_ERROR_MESSAGE;
         }
         logTransaction(self::PROGRAM_ID, "User $currentUser->id updated user $this->id");
-        return $error;
+        return $accumulatedErrors;
     }
 
     /**

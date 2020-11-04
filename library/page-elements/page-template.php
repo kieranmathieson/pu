@@ -10,7 +10,7 @@
 require_once 'library/code/init.php';
 // Check access to this page. Adjust the roles.
 $accessOk = isCurrentUserHasRole('faculty') || isCurrentUserHasRole('staff');
-checkAccess($accessOk);
+checkAccess($accessOk, __FILE__);
 // Set the page title shown in the header template.
 $pageTitle = 'Admin|PU';
 // Uncomment global if needed for the page's logic.

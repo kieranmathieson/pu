@@ -45,7 +45,7 @@ function writeCsvMessage(string $filePath, string $programId, string $message) {
  * @param $arr array to process.
  * @return array Processed array.
  */
-function replaceNullWithSpace(array $arr) {
+function replaceNullWithMtString(array $arr) {
     $result = [];
     foreach ($arr as $index=>$value) {
         if (is_null($value)) {
@@ -79,6 +79,29 @@ function isPersonIdInGetOK() {
 }
 
 /**
+ * Check whether there is an id in GET that is a valid course id.
+ * @return bool True if valid.
+ */
+function isCourseIdInGetOK() {
+    $courseIdOk = false;
+    if (isset($_GET['id'])) {
+        $courseId = $_GET['id'];
+        // Validate.
+        if (is_numeric($courseId) && $courseId > 0) {
+            // Does the course exist?
+            $course = new Course();
+            $errorMessage = $course->load($courseId);
+            if ($errorMessage == '') {
+                // Id is OK.
+                $courseIdOk = true;
+            }
+        }
+    }
+    return $courseIdOk;
+}
+
+
+/**
  * Get a field value from POST.
  * @param string $fieldName Name of the field.
  * @return string Trimmed value. MT if field not found.
@@ -86,9 +109,7 @@ function isPersonIdInGetOK() {
 function getFieldValueFromPost(string $fieldName) {
     $value = '';
     if (isset($_POST[$fieldName])) {
-        if ($_POST[$fieldName]) {
-            $value = trim($_POST[$fieldName]);
-        }
+        $value = trim($_POST[$fieldName]);
     }
     return $value;
 }
@@ -113,7 +134,8 @@ function makeCheckboxValueFromBool(bool $dataValue) {
  * @return bool
  */
 function isUsernameExists(string $username): bool {
-    global $dbConnection;
+    global $dbConnector;
+    $dbConnection = $dbConnector->getConnection();
     $sql = 'select person_id from people where username = :username';
     $queryData = [
         'username' => $username
@@ -136,7 +158,8 @@ function isUsernameExists(string $username): bool {
  * @return bool
  */
 function isEmailExists(string $email): bool {
-    global $dbConnection;
+    global $dbConnector;
+    $dbConnection = $dbConnector->getConnection();
     $sql = 'select person_id from people where email = :email';
     $queryData = [
         'email' => $email
